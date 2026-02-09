@@ -182,8 +182,6 @@ const PondDetails = () => {
             <p className="text-white">No weather data available.</p>
           )}
         </div>
-
-
       </div>
 
       {/* Graph Section */}

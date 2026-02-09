@@ -27,7 +27,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       {/* Sidebar */}
       <div
         className={`
-          fixed top-0 left-0 h-full z-40 bg-[#fffbfb] shadow-lg flex flex-col items-center py-10
+          fixed top-0 left-0 h-full z-40 flex flex-col items-center py-10
           transition-transform duration-300 ease-in-out
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0 md:relative md:flex

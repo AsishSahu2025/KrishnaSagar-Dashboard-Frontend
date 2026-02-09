@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import { Outlet } from "react-router-dom";
+import Footer from "./components/Footer";
 
 const Masterpage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
@@ -13,13 +14,14 @@ const Masterpage = () => {
   const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex min-h-screen">
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       <div className="flex flex-col flex-grow min-w-0">
         <Header toggleSidebar={toggleSidebar} />
-        <div className="p-2 overflow-y-auto flex-grow bg-gray-50">
+        <div className="p-2 flex-grow bg-gray-50">
           <Outlet /> {/* Renders PondDetails, ContactDetails, etc. */}
         </div>
+        <Footer />
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import React from 'react';
 import Img1 from '../assets/imgs/Kiit.png';
 import img2 from '../assets/imgs/img2.png';
-import logo from '../assets/imgs/angullogo.jpeg';
+import logo from '../assets/imgs/amadeus_logo.jfif';
 
 const Header = () => {
   return (
