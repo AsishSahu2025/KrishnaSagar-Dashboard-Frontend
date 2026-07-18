@@ -179,16 +179,5 @@ git push origin feature-name
 
 This project is licensed under the MIT License.
 
----
-
-## 👨‍💻 Author
-
-**Your Name**
-
-- GitHub: https://github.com/your-username
-- LinkedIn: https://linkedin.com/in/your-profile
-- Email: your-email@example.com
-
----
 
 ⭐ If you found this project helpful, consider giving it a star!
