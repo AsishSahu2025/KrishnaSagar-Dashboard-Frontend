@@ -449,7 +449,7 @@ const PondGraph = () => {
       });
 
       console.log("Selected Month:", monthNumber, "Selected Year:", yearNumber);
-console.log("API Response:", res.data);
+      console.log("API Response:", res.data);
 
       // Assume backend returns `week` as array of week labels (e.g., ["week 4"])
       const backendWeeks = (res.data.week || []).map(w =>
@@ -534,37 +534,45 @@ console.log("API Response:", res.data);
         {activeChart === 'divOne' ? (
           <div className="max-w-full w-full lg:max-w-full lg:flex mt-4">
             <div className="p-0 md:p-4 w-full flex gap-4 justify-around flex-col md:flex-row" style={{ backgroundColor: '#f2f2f2' }}>
-              <div className="flex flex-col w-full md:w-6/12 gap-4">
+              <div className="p-0 md:p-4 w-full flex flex-col gap-6 bg-[#f2f2f2]">
 
-                {/* AQUATIC MACROPHYTES */}
-                <div className="p-3 shadow-lg shadow-gray-500/50 bg-gray-100">
-                  <hr className="w-full" />
-                  <ChartComponent title="AQUATIC MACROPHYTES" data={alignedData.AQUATIC_MACROPYTES} labels={weekLabels} />
-                  <div className="group relative flex">
-                    {/* ... Info Tooltip ... */}
+                {/* TOP ROW */}
+                <div className="flex flex-col md:flex-row gap-4">
+
+                  {/* AQUATIC */}
+                  <div className="w-full md:w-1/2 p-3 bg-gray-100 shadow-lg shadow-gray-500/50">
+                    <hr />
+                    <ChartComponent
+                      title="AQUATIC MACROPHYTES"
+                      data={alignedData.AQUATIC_MACROPYTES}
+                      labels={weekLabels}
+                    />
+                  </div>
+
+                  {/* PHYCOCYANIN */}
+                  <div className="w-full md:w-1/2 p-3 bg-gray-100 shadow-lg shadow-gray-500/50">
+                    <hr />
+                    <ChartComponent
+                      title="Phycocyanin"
+                      data={alignedData.Phycocyanin}
+                      labels={weekLabels}
+                    />
+                  </div>
+
+                </div>
+
+                {/* CENTER CHLOROPHYLL */}
+                <div className="flex justify-center">
+                  <div className="w-full md:w-1/2 p-3 bg-gray-100 shadow-lg shadow-gray-500/50">
+                    <hr />
+                    <ChartComponent
+                      title="Chlorophyll"
+                      data={alignedData.Chl_a}
+                      labels={weekLabels}
+                    />
                   </div>
                 </div>
 
-                {/* CHLOROPHYLL */}
-                <div className="p-3 bg-gray-100 shadow-lg shadow-gray-500/50">
-                  <hr className="w-full" />
-                  <ChartComponent title="Chlorophyll" data={alignedData.Chl_a} labels={weekLabels} />
-                  <div className="group relative flex">
-                    {/* ... Info Tooltip ... */}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col w-full md:w-6/12 gap-4">
-
-                {/* PHYCOCYANIN */}
-                <div className="p-3 bg-gray-100 shadow-lg shadow-gray-500/50">
-                  <hr className="w-full" />
-                  <ChartComponent title="Phycocyanin" data={alignedData.Phycocyanin} labels={weekLabels} />
-                  <div className="group relative flex">
-                    {/* ... Info Tooltip ... */}
-                  </div>
-                </div>
               </div>
             </div>
           </div>
