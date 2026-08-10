@@ -20,7 +20,7 @@ const App = () => {
         <Route path="/forgetpassword" element={<ForgotPassword />} />
 
         {/* Main layout for nested pages */}
-        <Route path="/masterpage" element={<Masterpage />}>
+        <Route path="/dashboard" element={<Masterpage />}>
           <Route index element={<Navigate to="ponddetails" />} />
           <Route path="ponddetails" element={<PondDetails />} />
           <Route path="contactdetails" element={<ContactDetails />} />
