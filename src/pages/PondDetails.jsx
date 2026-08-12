@@ -8,10 +8,19 @@ import {
   Popup,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import L from 'leaflet';
 import axios from "axios";
 import PondGraph from "./PondGraph";
 import { useNavigate } from "react-router-dom";
 
+// Fix Leaflet marker icon issue in Vite
+delete L.Icon.Default.prototype._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
 const PondDetails = () => {
   const [weatherData, setWeatherData] = useState(null);
@@ -40,7 +49,6 @@ const PondDetails = () => {
     [13.396291481415052, 75.0076934695244],
     [13.397022064273894, 75.00766664743425], // closing the polygon by repeating the first point
   ];
-
 
   // City name for weather data - you can set as needed
   const cityName = "varanga"; // You can adjust or get dynamically
@@ -79,8 +87,7 @@ const PondDetails = () => {
     if (window.confirm("Are you sure you want to log out?")) {
       navigate("/");
     }
-
-  }
+  };
 
   return (
     <div className="p-4 w-full">
@@ -106,7 +113,6 @@ const PondDetails = () => {
 
       {/* Back Button */}
 
-
       <div className="flex flex-wrap gap-4 items-start mt-5">
         {/* Map Section */}
         <div className="h-[400px] w-full xl:w-3/5 relative rounded-lg overflow-hidden shadow-lg">
@@ -130,7 +136,6 @@ const PondDetails = () => {
               </LayersControl.BaseLayer>
             </LayersControl>
 
-
             {/* Polygon around pond */}
             <Polygon
               positions={polygonCoords}
@@ -146,9 +151,8 @@ const PondDetails = () => {
             <Marker position={pondCenter}>
               <Popup>Pond Center</Popup>
             </Marker>
-          </MapContainer> 
+          </MapContainer>
         </div>
-
 
         {/* Weather Section */}
         <div className="w-96 h-[400px] xl:w-[38%] bg-gradient-to-r from-blue-600 to-blue-300 p-5 rounded-lg shadow-lg flex flex-col justify-between">
