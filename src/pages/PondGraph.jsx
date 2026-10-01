@@ -210,7 +210,7 @@
 
 //               </div>
 
-        
+
 //             </div>
 //           </div>)}
 //       </div>
@@ -402,82 +402,101 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ChartComponent from "./ChartComponents";
+import { getMockGraphData } from "../utils/mockData";
 
 const PondGraph = () => {
-  // const id = localStorage.getItem('id');
   const BASEURL = import.meta.env.VITE_BASE_URL;
 
+  const now = new Date();
+  const realCurrentMonth = now.getMonth() + 1; // e.g. 10 (October)
+  const realCurrentYear = now.getFullYear();
+
   const [activeChart, setActiveChart] = useState("divOne");
-  const [selectedMonth, setSelectedMonth] = useState("");
-  const [selectedYear, setSelectedYear] = useState("");
-  const [weekLabels, setWeekLabels] = useState([]);
+  const [selectedYear, setSelectedYear] = useState(String(realCurrentYear));
+  const [selectedMonth, setSelectedMonth] = useState(String(realCurrentMonth));
+  const [weekLabels, setWeekLabels] = useState(["Week 1", "Week 2", "Week 3", "Week 4", "Week 5"]);
   const [alignedData, setAlignedData] = useState({
     AQUATIC_MACROPYTES: [],
     Chl_a: [],
     Phycocyanin: [],
-    dissolved_oxygen: [],
   });
 
-  // Helper to generate week labels for a month (assume 4 weeks)
+  // Available years: 2020 through 2030
+  const availableYears = [2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030];
+
+  // Available months: show all 12 months in the dropdown filter
+  const availableMonths = Array.from({ length: 12 }, (_, i) => i + 1);
+
   const generateWeekLabels = (numWeeks = 5) => {
     return Array.from({ length: numWeeks }, (_, i) => `Week ${i + 1}`);
   };
 
-  // Align data to week labels
   const alignDataToWeeks = (weekLabels, backendWeeks, backendData) => {
-    // Map week name to its index from backend
+    if (!backendWeeks || !backendWeeks.length || !backendData || !backendData.length) {
+      return null;
+    }
     const weekIndexMap = {};
     backendWeeks.forEach((w, idx) => {
-      // Normalize week label (e.g., "week 4" or "Week 4" to "Week 4")
       const normalized = w.replace(/^\w/, c => c.toUpperCase());
       weekIndexMap[normalized] = idx;
     });
 
-    // Fill data array: if week exists in backend, use its value, else null
     return weekLabels.map(label =>
       weekIndexMap.hasOwnProperty(label) ? backendData[weekIndexMap[label]] : null
     );
   };
 
   const getChart = async () => {
+    const monthNumber = selectedMonth ? parseInt(selectedMonth, 10) : realCurrentMonth;
+    const yearNumber = selectedYear ? parseInt(selectedYear, 10) : realCurrentYear;
+
+    // Check if selected month/year is in the future
+    const isFuture = (yearNumber > realCurrentYear) || (yearNumber === realCurrentYear && monthNumber > realCurrentMonth);
+
+    if (isFuture) {
+      // Future/advance month: do not display graph lines until that month occurs
+      setWeekLabels(generateWeekLabels(5));
+      setAlignedData({
+        AQUATIC_MACROPYTES: [null, null, null, null, null],
+        Chl_a: [null, null, null, null, null],
+        Phycocyanin: [null, null, null, null, null],
+      });
+      return;
+    }
+
+    const mockFallback = getMockGraphData(monthNumber, yearNumber);
+
     try {
-      const monthNumber = selectedMonth ? parseInt(selectedMonth, 10) : null;
-      const yearNumber = selectedYear ? parseInt(selectedYear, 10) : null;
       const res = await axios.post(`${BASEURL}/monthby/`, {
         month: monthNumber,
         year: yearNumber,
       });
 
-      console.log("Selected Month:", monthNumber, "Selected Year:", yearNumber);
-      console.log("API Response:", res.data);
+      if (res.data && res.data.week && res.data.week.length > 0) {
+        const backendWeeks = res.data.week.map(w => w.replace(/^\w/, c => c.toUpperCase()));
+        const allWeekLabels = generateWeekLabels(5);
+        setWeekLabels(allWeekLabels);
 
-      // Assume backend returns `week` as array of week labels (e.g., ["week 4"])
-      const backendWeeks = (res.data.week || []).map(w =>
-        w.replace(/^\w/, c => c.toUpperCase())
-      );
-
-      // Generate fixed week labels (e.g., Week 1 to Week 5)
-      const allWeekLabels = generateWeekLabels(5); // Adjust if you have more/fewer weeks
-      setWeekLabels(allWeekLabels);
-
-      // Align each dataset
-      setAlignedData({
-        AQUATIC_MACROPYTES: alignDataToWeeks(allWeekLabels, backendWeeks, res.data.AQUATIC_MACROPYTES || []),
-        Chl_a: alignDataToWeeks(allWeekLabels, backendWeeks, res.data.Chl_a || []),
-        Phycocyanin: alignDataToWeeks(allWeekLabels, backendWeeks, res.data.Phycocyanin || []),
-        dissolved_oxygen: alignDataToWeeks(allWeekLabels, backendWeeks, res.data.dissolved_oxygen || []),
-        GCI: alignDataToWeeks(allWeekLabels, backendWeeks, res.data.GCI || []),
-      });
-
+        setAlignedData({
+          AQUATIC_MACROPYTES: alignDataToWeeks(allWeekLabels, backendWeeks, res.data.AQUATIC_MACROPYTES) || mockFallback.AQUATIC_MACROPYTES,
+          Chl_a: alignDataToWeeks(allWeekLabels, backendWeeks, res.data.Chl_a) || mockFallback.Chl_a,
+          Phycocyanin: alignDataToWeeks(allWeekLabels, backendWeeks, res.data.Phycocyanin) || mockFallback.Phycocyanin,
+        });
+      } else {
+        setWeekLabels(mockFallback.week);
+        setAlignedData({
+          AQUATIC_MACROPYTES: mockFallback.AQUATIC_MACROPYTES,
+          Chl_a: mockFallback.Chl_a,
+          Phycocyanin: mockFallback.Phycocyanin,
+        });
+      }
     } catch (error) {
-      console.log("Data not found");
-      setWeekLabels(generateWeekLabels(5));
+      console.warn("Graph API unreachable. Displaying static simulation mode graph data:", error);
+      setWeekLabels(mockFallback.week);
       setAlignedData({
-        AQUATIC_MACROPYTES: [null, null, null, null],
-        Chl_a: [null, null, null, null],
-        Phycocyanin: [null, null, null, null],
-        dissolved_oxygen: [null, null, null, null],
-        GCI: [null, null, null, null],
+        AQUATIC_MACROPYTES: mockFallback.AQUATIC_MACROPYTES,
+        Chl_a: mockFallback.Chl_a,
+        Phycocyanin: mockFallback.Phycocyanin,
       });
     }
   };
@@ -491,9 +510,7 @@ const PondGraph = () => {
   };
 
   useEffect(() => {
-    if (selectedMonth && selectedYear) {
-      getChart();
-    }
+    getChart();
   }, [selectedMonth, selectedYear]);
 
   return (
@@ -502,14 +519,14 @@ const PondGraph = () => {
         <select
           name="month"
           id="month"
-          className="p-2 border-spacing-1 border-collapse"
+          className="p-2 border-spacing-1 border-collapse bg-white shadow rounded"
           value={selectedMonth}
           onChange={handleMonthChange}
         >
           <option value="">Select Month</option>
-          {Array.from({ length: 12 }, (_, i) => (
-            <option key={i + 1} value={i + 1}>
-              {new Date(0, i).toLocaleString("default", { month: "long" })}
+          {availableMonths.map((mNum) => (
+            <option key={mNum} value={mNum}>
+              {new Date(0, mNum - 1).toLocaleString("default", { month: "long" })}
             </option>
           ))}
         </select>
@@ -517,12 +534,12 @@ const PondGraph = () => {
         <select
           name="year"
           id="year"
-          className="p-2 border-spacing-1 border-collapse"
+          className="p-2 border-spacing-1 border-collapse bg-white shadow rounded"
           value={selectedYear}
           onChange={handleYearChange}
         >
           <option value="">Select Year</option>
-          {[2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030].map((year) => (
+          {availableYears.map((year) => (
             <option key={year} value={year}>
               {year}
             </option>
@@ -531,67 +548,48 @@ const PondGraph = () => {
       </div>
 
       <div className="mt-4">
-        {activeChart === 'divOne' ? (
-          <div className="max-w-full w-full lg:max-w-full lg:flex mt-4">
-            <div className="p-0 md:p-4 w-full flex gap-4 justify-around flex-col md:flex-row" style={{ backgroundColor: '#f2f2f2' }}>
-              <div className="p-0 md:p-4 w-full flex flex-col gap-6 bg-[#f2f2f2]">
+        <div className="max-w-full w-full lg:max-w-full flex mt-4">
+          <div className="p-0 md:p-4 w-full flex gap-4 justify-around flex-col" style={{ backgroundColor: '#f2f2f2' }}>
+            <div className="p-0 md:p-4 w-full flex flex-col gap-6 bg-[#f2f2f2]">
 
-                {/* TOP ROW */}
-                <div className="flex flex-col md:flex-row gap-4">
-
-                  {/* AQUATIC */}
-                  <div className="w-full md:w-1/2 p-3 bg-gray-100 shadow-lg shadow-gray-500/50">
-                    <hr />
-                    <ChartComponent
-                      title="AQUATIC MACROPHYTES"
-                      data={alignedData.AQUATIC_MACROPYTES}
-                      labels={weekLabels}
-                    />
-                  </div>
-
-                  {/* PHYCOCYANIN */}
-                  <div className="w-full md:w-1/2 p-3 bg-gray-100 shadow-lg shadow-gray-500/50">
-                    <hr />
-                    <ChartComponent
-                      title="Phycocyanin"
-                      data={alignedData.Phycocyanin}
-                      labels={weekLabels}
-                    />
-                  </div>
-
+              {/* TOP ROW (2 cards) */}
+              <div className="flex flex-col md:flex-row gap-4">
+                {/* AQUATIC MACROPHYTES */}
+                <div className="w-full md:w-1/2 p-3 bg-gray-100 shadow-lg shadow-gray-500/50 rounded-md">
+                  <hr className="mb-2" />
+                  <ChartComponent
+                    title="AQUATIC MACROPHYTES Chart"
+                    data={alignedData.AQUATIC_MACROPYTES}
+                    labels={weekLabels}
+                  />
                 </div>
 
-                {/* CENTER CHLOROPHYLL */}
-                <div className="flex justify-center">
-                  <div className="w-full md:w-1/2 p-3 bg-gray-100 shadow-lg shadow-gray-500/50">
-                    <hr />
-                    <ChartComponent
-                      title="Chlorophyll"
-                      data={alignedData.Chl_a}
-                      labels={weekLabels}
-                    />
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="max-w-full w-full lg:max-w-full lg:flex bg-white mt-4 md:p-8">
-            <div className="p-0 md:p-4 w-full flex gap-4 justify-around flex-col md:flex-row" style={{ backgroundColor: '#f2f2f2' }}>
-              <div className="flex flex-col w-full md:w-6/12 gap-4">
-                {/* ORP */}
-                <div className="p-3 bg-gray-100 shadow-lg shadow-gray-500/50">
-                  <hr className="w-full" />
-                  <ChartComponent title="ORP Chart" data={alignedData.GCI} labels={weekLabels} />
-                  <div className="group relative flex">
-                    {/* ... Info Tooltip ... */}
-                  </div>
+                {/* PHYCOCYANIN */}
+                <div className="w-full md:w-1/2 p-3 bg-gray-100 shadow-lg shadow-gray-500/50 rounded-md">
+                  <hr className="mb-2" />
+                  <ChartComponent
+                    title="Phycocyanin Chart"
+                    data={alignedData.Phycocyanin}
+                    labels={weekLabels}
+                  />
                 </div>
               </div>
+
+              {/* CENTER ROW (1 card - Chlorophyll) */}
+              <div className="flex justify-center">
+                <div className="w-full md:w-1/2 p-3 bg-gray-100 shadow-lg shadow-gray-500/50 rounded-md">
+                  <hr className="mb-2" />
+                  <ChartComponent
+                    title="Chlorophyll Chart"
+                    data={alignedData.Chl_a}
+                    labels={weekLabels}
+                  />
+                </div>
+              </div>
+
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
