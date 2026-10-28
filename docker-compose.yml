@@ -1,0 +1,9 @@
+services:
+  krishnasagar-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: krishnasagar-frontend
+    restart: unless-stopped
+    ports:
+      - "3008:3006"
