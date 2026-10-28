@@ -29,29 +29,20 @@ const PondDetails = () => {
   const WEATHER_API_KEY = "f06c28466bd98b962ed2e94b9fd29598";
 
   // Fixed LatLong for your pond (you can define polygon around this or just marker)
-  const pondCenter = [13.396210328591762, 75.00854277182263];
+  // const pondCenter = [13.396210328591762, 75.00854277182263];
+
+  const pondCenter = [20.831693, 85.094003];
 
   // Example polygon around that lat-long (a small square for demo)
   const polygonCoords = [
-    [13.397022064273894, 75.00766664743425],
-    [13.397282986185758, 75.00775784254076],
-    [13.397403010170198, 75.00792950391771],
-    [13.397423883900503, 75.00818699598314],
-    [13.397418665468093, 75.00868588685991],
-    [13.39717339901725, 75.00891655683519],
-    [13.396395850530729, 75.00918477773668],
-    [13.395245178528182, 75.00931620597841],
-    [13.395018174558002, 75.00928133726121],
-    [13.39485640148303, 75.00821381807329],
-    [13.394945115763417, 75.00802606344224],
-    [13.395320846470646, 75.00782221555711],
-    [13.395800945964863, 75.00772029161455],
-    [13.396291481415052, 75.0076934695244],
-    [13.397022064273894, 75.00766664743425], // closing the polygon by repeating the first point
+    [20.832328, 85.093822],
+    [20.831273, 85.094729],
+    [20.829766, 85.092846],
+    [20.830840, 85.091731]
   ];
 
   // City name for weather data - you can set as needed
-  const cityName = "varanga"; // You can adjust or get dynamically
+  const cityName = "Angul"; // You can adjust or get dynamically
 
   useEffect(() => {
     const fetchWeatherData = async (city) => {
@@ -159,7 +150,7 @@ const PondDetails = () => {
           <div className="text-center mb-2">
             <h3 className="text-2xl text-white">Today's Weather</h3>
             {/* <p className="text-white text-3xl mt-1 font-bold">{cityName}</p> */}
-            <p className="text-white text-3xl mt-1 font-bold">Varanga</p>
+            <p className="text-white text-3xl mt-1 font-bold">Angul</p>
           </div>
 
           {loadingWeather ? (

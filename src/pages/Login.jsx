@@ -10,34 +10,47 @@ const SignIn = () => {
   const [password, setPassword] = useState('Bariflo@2026');
   const [error, setError] = useState('');
 
+
   const onSubmit = async (e) => {
     e.preventDefault();
-
-    localStorage.setItem('token', 'mock-access-token-simulation');
-    localStorage.setItem('name', 'bariflolabs.deploy@gmail.com');
-    localStorage.setItem('Email', identifier || 'bariflolabs.deploy@gmail.com');
-    localStorage.setItem('password', password || 'Bariflo@2026');
-    localStorage.setItem('Mob', '9876543210');
-    localStorage.setItem('id', '1');
+    setError('');
 
     try {
-      const response = await axios.post(`${apiUrl}/signin/`, {
-        identifier,
-        password,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await axios.post(
+        `${apiUrl}/signin/`,
+        { identifier, password },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-      if (response.data) {
-        localStorage.setItem('token', response.data.access || 'mock-access-token');
-        if (response.data.name) localStorage.setItem('name', response.data.name);
-      }
-    } catch (err) {
-      console.warn('Backend offline. Continuing with static credentials in simulation mode:', err);
-    } finally {
+      const data = response.data;
+
+      // Save actual backend response data
+      localStorage.setItem('token', data.access);
+      localStorage.setItem('refresh', data.refresh);
+      localStorage.setItem('name', data.name);
+      localStorage.setItem('Email', data.Email);
+      localStorage.setItem('Mob', String(data.Mob));
+      localStorage.setItem('id', String(data.id));
+      localStorage.setItem('address', data.address || '');
+
+      // Remove any previously saved password
+      localStorage.removeItem('password');
+
       navigate('/masterpage');
+    } catch (err) {
+      console.error(
+        'Login failed:',
+        err.response?.data || err.message
+      );
+
+      setError(
+        err.response?.data?.detail ||
+        'Login failed. Please check your credentials.'
+      );
     }
   };
 
